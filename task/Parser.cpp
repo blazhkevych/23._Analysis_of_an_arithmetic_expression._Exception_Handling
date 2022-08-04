@@ -67,7 +67,8 @@ void Parser::ExpressionTraversal(char* str)
 			str[i] != '6' && str[i] != '7' && str[i] != '8' &&
 			str[i] != '9' &&
 			str[i] != '-' && str[i] != '*' && str[i] != '/' &&
-			str[i] != '^' && str[i] != '+'
+			str[i] != '^' && str[i] != '+' &&
+			str[i] != '(' && str[i] != ')'
 			)
 		{
 			throw InvalidCharacterInExpression("Недопустимый символ в выражении"); // Сгенерировать исключение типа InvalidCharacterInExpression.
