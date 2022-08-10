@@ -9,6 +9,8 @@ class BaseException abstract
 protected:
 	char m_msg[100];
 public:
+	virtual ~BaseException() = default;
+
 	BaseException(const char* msg)
 	{
 		strcpy_s(m_msg, msg);
@@ -22,13 +24,46 @@ public:
 	InvalidCharacterInExpression(const char* msg) : BaseException(msg) {}
 };
 
+class TwoIdenticalOperationSignsInRow :public BaseException
+{
+public:
+	TwoIdenticalOperationSignsInRow(const char* msg) : BaseException(msg) {}
+};
+
+class TwoDecimalPointsInRow :public BaseException
+{
+public:
+	TwoDecimalPointsInRow(const char* msg) : BaseException(msg) {}
+};
+
+class NoOperationSignBetweenNumberNndOpeningBracket :public BaseException
+{
+public:
+	NoOperationSignBetweenNumberNndOpeningBracket(const char* msg) : BaseException(msg) {}
+};
+
+class NoBinaryOperationBetweenClosingBracketAndNumber :public BaseException
+{
+public:
+	NoBinaryOperationBetweenClosingBracketAndNumber(const char* msg) : BaseException(msg) {}
+};
+
+class NoExpressionBetweenOpeningAndClosingBrace :public BaseException
+{
+public:
+	NoExpressionBetweenOpeningAndClosingBrace(const char* msg) : BaseException(msg) {}
+};
+
+class NoExpressionBetweenOpeningBracketAndSignBinaryOperation :public BaseException
+{
+public:
+	NoExpressionBetweenOpeningBracketAndSignBinaryOperation(const char* msg) : BaseException(msg) {}
+};
+
+
+
+
 /*
-// Недопустимый символ в выражении.											  // Invalid character in expression.
-// В выражении подряд идут два знака операции.								  // In the expression, there are two signs of the operation in a row.
-// В выражении подряд идут две десятичные точки.							  // Expression has two decimal points in a row.
-// Между числом и открывающей скобкой отсутствует знак операции.			  // There is no operation sign between the number and the opening bracket.
-// Между закрывающей скобкой и числом отсутствует знак бинарной операции.	  // There is no binary operation sign between the closing bracket and the number.
-// Между открывающей и закрывающей скобкой отсутствует выражение.			  // There is no expression between the opening and closing brace.
 // Между открывающей скобкой и знаком бинарной операции отсутствует выражение.// There is no expression between the opening bracket and the sign of the binary operation.
 // Между знаком бинарной операции и закрывающей скобкой отсутствует выражение.// There is no expression between the binary operation sign and the closing bracket.
 // Между закрывающей и открывающей скобкой отсутствует знак бинарной операции.// There is no sign of a binary operation between the closing and opening brace.
