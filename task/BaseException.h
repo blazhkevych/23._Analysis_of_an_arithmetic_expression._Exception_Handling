@@ -60,6 +60,18 @@ public:
 	NoExpressionBetweenOpeningBracketAndSignBinaryOperation(const char* msg) : BaseException(msg) {}
 };
 
+class NoExpressionBetweenBinaryOperationAndClosingBracket :public BaseException
+{
+public:
+	NoExpressionBetweenBinaryOperationAndClosingBracket(const char* msg) : BaseException(msg) {}
+};
+
+class NoBinaryOperationBetweenClosingAndOpeningBrace :public BaseException
+{
+public:
+	NoBinaryOperationBetweenClosingAndOpeningBrace(const char* msg) : BaseException(msg) {}
+};
+
 
 
 
