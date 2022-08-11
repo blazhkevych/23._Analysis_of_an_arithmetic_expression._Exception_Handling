@@ -72,6 +72,12 @@ public:
 	NoBinaryOperationBetweenClosingAndOpeningBrace(const char* msg) : BaseException(msg) {}
 };
 
+class ExpressionStartsWithBinaryOperation :public BaseException
+{
+public:
+	ExpressionStartsWithBinaryOperation(const char* msg) : BaseException(msg) {}
+};
+
 
 
 

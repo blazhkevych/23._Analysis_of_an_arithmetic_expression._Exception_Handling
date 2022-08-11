@@ -63,7 +63,7 @@ void Parser::ExpressionTraversal(char* str)
 
 	for (int i = 0; i < len; i++) // Проверка на корректность символов в строке.
 	{
-		// Недопустимый символ в выражении. // OK
+		// 1. Недопустимый символ в выражении. // OK
 		if (
 			str[i] != '0' && str[i] != '1' && str[i] != '2' &&
 			str[i] != '3' && str[i] != '4' && str[i] != '5' &&
@@ -75,10 +75,11 @@ void Parser::ExpressionTraversal(char* str)
 			str[i] != '.'
 			)
 		{
-			throw new InvalidCharacterInExpression("\n\nНедопустимый символ в выражении !\n\n"); // TODO: попробовать добавить в параметры str[i] 
+			throw new InvalidCharacterInExpression("\n\n1. Недопустимый символ в выражении !\n\n"); // TODO: попробовать добавить в параметры str[i] 
 		}
 
-		// В выражении подряд идут два знака операции. // OK	
+		// 2. В выражении подряд идут два знака операции. // OK
+		// (5.11++2.22^3.33-(4.44-(2.22+3.33)*2.22)-1.11)
 		if (
 			str[i] == '-' && str[i + 1] == '-' ||
 			str[i] == '+' && str[i + 1] == '+' ||
@@ -87,21 +88,22 @@ void Parser::ExpressionTraversal(char* str)
 			str[i] == '^' && str[i + 1] == '^'
 			)
 		{
-			throw new TwoIdenticalOperationSignsInRow("\n\nВ выражении подряд идут два знака операции !\n\n");
+			throw new TwoIdenticalOperationSignsInRow("\n\n2. В выражении подряд идут два знака операции !\n\n");
 		}
 
-		// В выражении подряд идут две десятичные точки. // OK
+		// 3. В выражении подряд идут две десятичные точки. // OK
+		// (5.11+2..22^3.33-(4.44-(2.22+3.33)*2.22)-1.11)
 		if (str[i] == '.' && str[i + 1] == '.')
 		{
-			throw new TwoDecimalPointsInRow("\n\nВ выражении подряд идут две десятичные точки !\n\n");
+			throw new TwoDecimalPointsInRow("\n\n3. В выражении подряд идут две десятичные точки !\n\n");
 		}
 
-		// Между числом и открывающей скобкой отсутствует знак операции. // ??
+		// 4. Между числом и открывающей скобкой отсутствует знак операции. // OK
 		// (5.11+2.22^3.33(4.44-(2.22+3.33)*2.22)-1.11)
 		if (str[i] >= '0' && str[i] <= '9' && str[i + 1] == '(') // Если число, заходим.
 		{
 			{
-				throw new NoOperationSignBetweenNumberNndOpeningBracket("\n\nМежду числом и открывающей скобкой отсутствует знак операции !\n\n");
+				throw new NoOperationSignBetweenNumberNndOpeningBracket("\n\n4. Между числом и открывающей скобкой отсутствует знак операции !\n\n");
 			}
 
 			//bool operationSign_0{ false }; // Знак операции встретился на пути к открывающей скобке ?, если да - true.
@@ -120,12 +122,13 @@ void Parser::ExpressionTraversal(char* str)
 			//}
 		}
 
-		// Между закрывающей скобкой и числом отсутствует знак бинарной операции. // ???
+		// 5. Между закрывающей скобкой и числом отсутствует знак бинарной операции. // OK
 		// (5.11+2.22^3.33-(4.44-(2.22+3.33)2.22)-1.11)
-		if (str[i] == ')') // Если ')', заходим.
+		if (str[i] == ')' && str[i + 1] >= '0' && str[i + 1] <= '9')
 		{
-
-			// попробовать как в примере выше.
+			{
+				throw new NoBinaryOperationBetweenClosingBracketAndNumber("\n\n5. Между закрывающей скобкой и числом отсутствует знак бинарной операции !\n\n");
+			}
 
 			//bool operationSign_1{ false }; // Знак бинарной операции встретился на пути к числу ?, если да - true.
 			//for (int j = i + 1; j < len; j++) // Бежим от следующего знака, после str[i].
@@ -143,14 +146,36 @@ void Parser::ExpressionTraversal(char* str)
 			//}
 		}
 
-		// Между открывающей и закрывающей скобкой отсутствует выражение. // OK
-		// (5.11+2.22^3.33-(4.44-()*2.22)-1.11)
-		if (str[i] == '(' && str[i + 1] == ')') // Если '(', заходим.
+		// 6. Между открывающей и закрывающей скобкой отсутствует выражение. // OK
+		// (5.11+2.22^3.33-(4.44-(2.22+3.33)*2.22)-1.11)
+		if (i != 0 && str[i] == '(')
 		{
-			throw new NoExpressionBetweenOpeningAndClosingBrace("\n\nМежду открывающей и закрывающей скобкой отсутствует выражение !\n\n");
+			bool inNumber{ false }; // Находимся в числе.
+			int numbers{ 0 }; // Подсчет чисел в выражении.
+			for (int j = i + 1; j < len || str[j] != ')'; j++)
+			{
+				while (str[j] >= '0' && str[j] <= '9' && str[j] == '.')
+				{
+					j++;
+					if (str[j] <= '0' && str[j] >= '9' && str[j] != '.')
+						inNumber = true;
+					else
+					{
+						inNumber = false;
+						numbers++;
+						if (numbers == 2)
+							break;
+					}
+
+				}
+			}
 		}
 
-		// Между открывающей скобкой и знаком бинарной операции отсутствует выражение. // OK
+		/*{
+			throw new NoExpressionBetweenOpeningAndClosingBrace("\n\n6. Между открывающей и закрывающей скобкой отсутствует выражение !\n\n");
+		}*/
+
+		// 7. Между открывающей скобкой и знаком бинарной операции отсутствует выражение. // ?
 		// NoExpressionBetweenOpeningBracketAndSignBinaryOperation
 		// (+2.22^3.33-(4.44-(2.22+3.33)*2.22)-1.11)
 		if (
@@ -161,10 +186,10 @@ void Parser::ExpressionTraversal(char* str)
 			str[i] == '(' && str[i + 1] == '^'
 			) // Если '(', заходим.
 		{
-			throw new NoExpressionBetweenOpeningBracketAndSignBinaryOperation("\n\nМежду открывающей скобкой и знаком бинарной операции отсутствует выражение !\n\n");
+			throw new NoExpressionBetweenOpeningBracketAndSignBinaryOperation("\n\n7. Между открывающей скобкой и знаком бинарной операции отсутствует выражение !\n\n");
 		}
 
-		// Между знаком бинарной операции и закрывающей скобкой отсутствует выражение. // OK
+		// 8. Между знаком бинарной операции и закрывающей скобкой отсутствует выражение. // OK
 		// NoExpressionBetweenBinaryOperationAndClosingBracket.
 		// (5.11+2.22^3.33-(4.44-(2.22+)*2.22)-1.11)
 		if (
@@ -175,20 +200,33 @@ void Parser::ExpressionTraversal(char* str)
 			str[i] == '^' && str[i + 1] == ')'
 			) // Если знак бинарной операции, заходим.
 		{
-			throw new NoExpressionBetweenBinaryOperationAndClosingBracket("\n\nМежду знаком бинарной операции и закрывающей скобкой отсутствует выражение !\n\n");
+			throw new NoExpressionBetweenBinaryOperationAndClosingBracket("\n\n8. Между знаком бинарной операции и закрывающей скобкой отсутствует выражение !\n\n");
 		}
 
-		// Между закрывающей и открывающей скобкой отсутствует знак бинарной операции. // ?
+		// 9. Между закрывающей и открывающей скобкой отсутствует знак бинарной операции. // ?
 		// NoBinaryOperationBetweenClosingAndOpeningBrace.
 		// (5.11+2.22^3.33-(4.44-2.22)(3.33*2.22)-1.11)
 		if (str[i] == ')' && str[i + 1] == '(') // Если ')', заходим.
 		{
-			throw new NoBinaryOperationBetweenClosingAndOpeningBrace("\n\nМежду закрывающей и открывающей скобкой отсутствует знак бинарной операции !\n\n");
+			throw new NoBinaryOperationBetweenClosingAndOpeningBrace("\n\n9. Между закрывающей и открывающей скобкой отсутствует знак бинарной операции !\n\n");
+		}
+
+		// 10. Выражение начинается со знака бинарной операции.
+		// ExpressionStartsWithBinaryOperation
+		// (+5.11+2.22^3.33-(4.44-(2.22+3.33)*2.22)-1.11)
+		if (
+			str[0] == '(' && str[1] == '+' ||
+			str[0] == '(' && str[1] == '-' ||
+			str[0] == '(' && str[1] == '*' ||
+			str[0] == '(' && str[1] == '/' ||
+			str[0] == '(' && str[1] == '^'
+			) // Если ')', заходим.
+		{
+			throw new ExpressionStartsWithBinaryOperation("\n\n10. Выражение начинается со знака бинарной операции !\n\n");
 		}
 
 
 
-		// Выражение начинается со знака бинарной операции.							  // The expression starts with the sign of the binary operation.
 		// Выражение начинается с закрывающей скобки.								  // The expression starts with a closing brace.
 		// Выражение заканчивается знаком бинарной операции.						  // The expression ends with a binary operation sign.
 		// Некорректная запись десятичной дроби.									  // Incorrect decimal notation.
