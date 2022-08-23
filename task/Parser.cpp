@@ -159,13 +159,14 @@ void Parser::ExpressionTraversal(char* str)
 					j++;
 					if (str[j] <= '0' && str[j] >= '9' && str[j] != '.')
 						inNumber = true;
-					else
+					/*else
 					{
 						inNumber = false;
 						numbers++;
 						if (numbers == 2)
 							break;
-					}
+						if ()
+					}*/
 
 				}
 			}
